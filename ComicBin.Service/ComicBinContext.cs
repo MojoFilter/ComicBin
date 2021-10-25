@@ -45,6 +45,13 @@ namespace ComicBin.Service
             return await this.Books.ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
+        public Task<string> GetBookPathAsync(string bookId, CancellationToken cancellationToken)
+        {
+            return this.Books.Where(b => b.Id == bookId)
+                             .Select(b => b.Path)
+                             .FirstAsync(cancellationToken);
+        }
+
         private readonly string _dbPath;
     }
 }

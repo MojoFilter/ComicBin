@@ -1,12 +1,16 @@
 using ComicBin.Service;
+using ComicBin.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.UseComicBinService();
+builder.Services.AddEndpointsApiExplorer()
+                .AddSwaggerGen()
+                .UseComicBinService()
+                .UseComicBinWebConfiguration();
+
+builder.Configuration.AddJsonFile("appsettings.local.json", true, true);
 
 var app = builder.Build();
 
@@ -25,6 +29,17 @@ app.MapGet("/refresh", async (IComicBinRepo repo, CancellationToken ct) =>
 })
     .WithName("RefreshComicDatabase");
 
-app.MapGet("/allbooks", (IComicBinRepo repo, CancellationToken ct) => repo.GetAllBooksAsync(ct));
+app.MapGet("/allbooks", 
+          (IComicBinRepo repo, CancellationToken ct) => repo.GetAllBooksAsync(ct))
+   .WithName("AllBooks");
+
+app.MapGet("/cover/{bookId}",
+    async (HttpContext context, string bookId, IComicBinRepo repo, CancellationToken ct) =>
+    {
+        context.Response.ContentType = "image/jpg";
+        var image = await repo.GetCoverAsync(bookId).ConfigureAwait(false);
+        await image.CopyToAsync(context.Response.Body, ct).ConfigureAwait(false);
+    })
+   .WithName("Cover");
 
 app.Run();

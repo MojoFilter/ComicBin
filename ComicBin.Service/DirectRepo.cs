@@ -24,6 +24,13 @@
             return await context.GetAllBooksAsync(cancellationToken).ConfigureAwait(false);
         }
 
+        public async Task<Stream> GetCoverAsync(string bookId, CancellationToken cancellationToken = default)
+        {
+            using var context = _contextFactory.NewComicBinContext();
+            var path = await context.GetBookPathAsync(bookId, cancellationToken).ConfigureAwait(false);
+            return await _reader.GetCoverAsync(path, cancellationToken).ConfigureAwait(false);
+        }
+
         private readonly IComicFileRepo _fileRepo;
         private readonly IComicBinContextFactory _contextFactory;
         private readonly IComicFileReader _reader;
