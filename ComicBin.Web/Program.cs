@@ -38,7 +38,7 @@ app.MapGet("/cover/{bookId}",
     {
         context.Response.ContentType = "image/jpg";
         var image = await repo.GetCoverAsync(bookId).ConfigureAwait(false);
-        await image.CopyToAsync(context.Response.Body, ct).ConfigureAwait(false);
+        await image.CopyToAsync(context.Response.Body, ct).ConfigureAwait(false);        
     })
    .WithName("Cover");
 

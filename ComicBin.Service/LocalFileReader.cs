@@ -1,5 +1,6 @@
 ﻿using SharpCompress.Archives.Rar;
-using System.IO.Compression;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 
 namespace ComicBin.Service
 {
@@ -19,13 +20,23 @@ namespace ComicBin.Service
 
         public async Task<Stream> GetCoverAsync(string bookPath, CancellationToken cancellationToken = default)
         {
-            return await Task.Run(() =>
+            using var archive = RarArchive.Open(bookPath);
+            var entries = archive.Entries.OrderBy(e => e.Key).ToList();
+            using var source = archive.Entries.OrderBy(e=>e.Key)
+                                        .Where(e=>!e.IsDirectory && e.Key.Contains(".jpg"))
+                                        .Select(e => e.OpenEntryStream())
+                                        .First();
+            var dest = new MemoryStream();
+            using var image = Image.Load(source);
+            var resizeOptions = new ResizeOptions()
             {
-                using var archive = RarArchive.Open(bookPath);
-                return archive.Entries.OrderBy(e=>e.Key)
-                                      .Select(e => e.OpenEntryStream())
-                                      .First();
-            });
+                Mode = ResizeMode.Max,
+                Size = new Size(170, 220)
+            };
+            image.Mutate(x => x.Resize(resizeOptions));
+            await image.SaveAsJpegAsync(dest, cancellationToken).ConfigureAwait(false);
+            dest.Position = 0;
+            return dest;
         }
     }
 }

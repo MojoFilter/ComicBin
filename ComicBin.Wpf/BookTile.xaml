@@ -1,0 +1,24 @@
+﻿<local:BookTileBase x:Class="ComicBin.Wpf.BookTile"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ComicBin.Wpf"
+             xmlns:cb="clr-namespace:ComicBin;assembly=ComicBin.Surface"
+             mc:Ignorable="d" 
+             d:DesignHeight="220" 
+             d:DesignWidth="220"
+             d:DataContext="{d:DesignInstance {x:Type cb:Book}}">
+    <Grid Width="220">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Border Width="170"
+                Height="220">
+            <Image x:Name="coverImage" />
+        </Border>
+        <TextBlock Grid.Row="1"
+                   Text="{Binding Title}" />
+    </Grid>
+</local:BookTileBase>
