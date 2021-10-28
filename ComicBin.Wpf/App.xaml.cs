@@ -1,4 +1,5 @@
-﻿using ComicBin.Client;
+﻿using Akavache;
+using ComicBin.Client;
 using ComicBin.Client.Ui;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,14 +32,16 @@ namespace ComicBin.Wpf
 
         protected override async void OnStartup(StartupEventArgs e)
         {
-            //await _host.StartAsync().ConfigureAwait(true);
-            var mainWindow = _host.Services.GetRequiredService<MainWindow>();
-            mainWindow.Show();
-            //base.OnStartup(e);
+            await _host.StartAsync().ConfigureAwait(true);
+            this.MainWindow = _host.Services.GetRequiredService<MainWindow>();
+            this.MainWindow.Show();
+            this.ShutdownMode = ShutdownMode.OnMainWindowClose;
+            base.OnStartup(e);
         }
 
         protected override async void OnExit(ExitEventArgs e)
         {
+            await BlobCache.Shutdown().ConfigureAwait(true);
             await _host.StopAsync().ConfigureAwait(true);
             _host.Dispose();
             base.OnExit(e);

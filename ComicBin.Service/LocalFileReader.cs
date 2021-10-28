@@ -20,14 +20,33 @@ namespace ComicBin.Service
 
         public async Task<Stream> GetCoverAsync(string bookPath, CancellationToken cancellationToken = default)
         {
-            using var archive = RarArchive.Open(bookPath);
-            var entries = archive.Entries.OrderBy(e => e.Key).ToList();
-            using var source = archive.Entries.OrderBy(e=>e.Key)
-                                        .Where(e=>!e.IsDirectory && e.Key.Contains(".jpg"))
-                                        .Select(e => e.OpenEntryStream())
-                                        .First();
+            Stream? source;
+            try
+            {
+                using var archive = RarArchive.Open(bookPath);
+                var entries = archive.Entries.OrderBy(e => e.Key).ToList();
+                source = await archive.Entries.OrderBy(e => e.Key)
+                                            .Where(e => !e.IsDirectory && e.Key.Contains(".jpg"))
+                                            .Select(async e =>
+                                            {
+                                                var outStream = new MemoryStream();
+                                                using var inStream = e.OpenEntryStream();
+                                                await inStream.CopyToAsync(outStream);
+                                                outStream.Position = 0;
+                                                return outStream;
+                                            })
+                                            .First()
+                                            .ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                var ass = this.GetType().Assembly;
+                var resources = ass.GetManifestResourceNames();
+                source = this.GetType().Assembly.GetManifestResourceStream("ComicBin.Service.MissingBook.jpg");
+            }
             var dest = new MemoryStream();
             using var image = Image.Load(source);
+            source?.Dispose();
             var resizeOptions = new ResizeOptions()
             {
                 Mode = ResizeMode.Max,

@@ -1,14 +1,17 @@
-﻿using System.Collections.Concurrent;
+﻿using Akavache;
+using System.Collections.Concurrent;
 using System.Net.Http.Json;
+using System.Reactive.Linq;
 
 namespace ComicBin.Client
 {
     internal class ComicBinClient : IComicBinClient
     {
-        public ComicBinClient(HttpClient httpClient, IUriBuilder uriBuilder)
+        public ComicBinClient(HttpClient httpClient, IUriBuilder uriBuilder, IBlobCache cache)
         {
             _uriBuilder = uriBuilder;
             _httpClient = httpClient;
+            _cache = cache;
             _taskQueue = new ConcurrentQueue<Func<Task>>();
         }
 
@@ -21,28 +24,34 @@ namespace ComicBin.Client
 
         public async Task<Stream> GetCoverAsync(string bookId, CancellationToken cancellationToken)
         {
-            var taskSource = new TaskCompletionSource<Stream>();
-            lock (_taskQueue)
-            {
-                _taskQueue.Enqueue(async () =>
+            var data = await _cache.GetOrFetchObject<byte[]>(
+                $"cover/{bookId}",
+                async () =>
                 {
-                    try
+                    var taskSource = new TaskCompletionSource<byte[]>();
+                    lock (_taskQueue)
                     {
-                        var uri = _uriBuilder.Build("cover", bookId);
-                        var stream = await _httpClient.GetStreamAsync(uri, cancellationToken).ConfigureAwait(false);
-                        taskSource.SetResult(stream);
+                        _taskQueue.Enqueue(async () =>
+                        {
+                            try
+                            {
+                                var uri = _uriBuilder.Build("cover", bookId);
+                                var bytes = await _httpClient.GetByteArrayAsync(uri, cancellationToken).ConfigureAwait(false);
+                                taskSource.SetResult(bytes);
+                            }
+                            catch (Exception ex)
+                            {
+                                taskSource.SetException(ex);
+                            }
+                        });
+                        if (!_processingQueue)
+                        {
+                            this.ProcessQueue();
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        taskSource.SetException(ex);
-                    }
+                    return await taskSource.Task;
                 });
-                if (!_processingQueue)
-                {
-                    this.ProcessQueue();
-                }
-            }
-            return await taskSource.Task;
+            return new MemoryStream(data);
         }
 
         private async void ProcessQueue()
@@ -60,5 +69,6 @@ namespace ComicBin.Client
         private readonly ConcurrentQueue<Func<Task>> _taskQueue;
         private readonly IUriBuilder _uriBuilder;
         private readonly HttpClient _httpClient;
+        private readonly Akavache.IBlobCache _cache;
     }
 }
