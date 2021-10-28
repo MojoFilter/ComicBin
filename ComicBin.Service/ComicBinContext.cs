@@ -35,6 +35,7 @@ namespace ComicBin.Service
         {
             await foreach (var book in newBooks.WithCancellation(cancellationToken))
             {
+                book.AddedUtc = DateTime.UtcNow;
                 this.Add(book);
             }
             await this.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

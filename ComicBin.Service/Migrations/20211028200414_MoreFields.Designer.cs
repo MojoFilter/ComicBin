@@ -3,14 +3,16 @@ using System;
 using ComicBin.Service;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ComicBin.Service.Migrations
 {
     [DbContext(typeof(ComicBinContext))]
-    partial class ComicBinContextModelSnapshot : ModelSnapshot
+    [Migration("20211028200414_MoreFields")]
+    partial class MoreFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,6 +27,7 @@ namespace ComicBin.Service.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Number")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Path")
@@ -32,6 +35,7 @@ namespace ComicBin.Service.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Publisher")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Series")
@@ -39,6 +43,7 @@ namespace ComicBin.Service.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Summary")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
