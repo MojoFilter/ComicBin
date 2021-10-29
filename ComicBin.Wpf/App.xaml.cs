@@ -4,6 +4,7 @@ using ComicBin.Client.Ui;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Reactive.Concurrency;
 using System.Windows;
 
 namespace ComicBin.Wpf
@@ -26,6 +27,7 @@ namespace ComicBin.Wpf
         {
             services.AddSingleton<MainWindow>(p => new MainWindow(p.GetRequiredService<ILibraryViewModel>()))
                     .AddSingleton<IComicBinClientConfiguration, ComicBinConfiguration>()
+                    .AddSingleton<IScheduler>(DispatcherScheduler.Current)
                     .AddComicBinClient()
                     .AddComicBinClientUi();
         }

@@ -97,7 +97,7 @@ namespace ComicBin.Service
                     var doc = XDocument.Load(stream);
                     string node(XName name, string defaultValue = "") => doc.Root!.Descendants(name).Select(n => n.Value).DefaultIfEmpty(defaultValue).FirstOrDefault()!;
                     book.Series = node("Series", book.Series);
-                    book.Number = node("Number", book.Number);
+                    book.Number = node("Number", book.Number ?? string.Empty);
                     book.Summary = node("Summary");
                     book.Publisher = node("Publisher");
                 }

@@ -14,7 +14,20 @@
         <Button DockPanel.Dock="Top"
                 Content="Refresh"
                 Command="{Binding RefreshCommand}" />
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <local:LibraryBrowser />
+            <GridSplitter HorizontalAlignment="Right"
+                          VerticalAlignment="Stretch"
+                          Width="5" />
+
+
             <ListBox x:Name="bookList"
+                     Grid.Column="1"
                      ItemsSource="{Binding Books}"
                      SelectedItem="{Binding SelectedBook}"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -23,11 +36,12 @@
                         <WrapPanel />
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <local:BookTile ViewModel="{Binding}" />
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <local:BookTile ViewModel="{Binding}" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
     </DockPanel>
 </local:LibraryViewBase>
