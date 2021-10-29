@@ -12,6 +12,8 @@ namespace ComicBin.Client.Ui
             var refreshCommand = ReactiveCommand.CreateFromTask(ct => this.RefreshBooksAsync(ct));
             this.RefreshCommand = refreshCommand;
             _books = refreshCommand.ToProperty(this, nameof(Books));
+            _status = this.WhenAnyValue(x => x.SelectedBook, b => b is Book ? $"{b.Series} #{b.Number}" : String.Empty)
+                          .ToProperty(this, nameof(Status));
 
             this.WhenActivated((CompositeDisposable disposables) =>
             {
@@ -23,6 +25,16 @@ namespace ComicBin.Client.Ui
 
         public IEnumerable<Book> Books => _books.Value;
 
+        private Book? _selectedBook;
+        public Book? SelectedBook
+        {
+            get => _selectedBook;
+            set => this.RaiseAndSetIfChanged(ref _selectedBook, value);
+        }
+
+        public string Status => _status.Value;
+
+
         public ViewModelActivator Activator { get; } = new ViewModelActivator();
 
         private async Task<IEnumerable<Book>> RefreshBooksAsync(CancellationToken cancellationToken)
@@ -32,5 +44,6 @@ namespace ComicBin.Client.Ui
 
         private readonly IComicBinClient _client;
         private readonly ObservableAsPropertyHelper<IEnumerable<Book>> _books;
+        private readonly ObservableAsPropertyHelper<string> _status;
     }
 }

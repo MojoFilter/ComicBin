@@ -57,12 +57,18 @@ namespace ComicBin.Client
         private async void ProcessQueue()
         {
             _processingQueue = true;
-            while (_taskQueue.TryDequeue(out var task))
+            async Task RunProcessLoopAsync()
             {
-                await task().ConfigureAwait(false);
+                while (_taskQueue.TryDequeue(out var task))
+                {
+                    await task().ConfigureAwait(false);
+                }
             }
+            var loopTasks = Enumerable.Range(0, QueueConcurrency).Select(_ => RunProcessLoopAsync()).ToList();
+            await Task.WhenAll(loopTasks).ConfigureAwait(false);
             _processingQueue = false;
         }
+
 
         private bool _processingQueue;
 
@@ -70,5 +76,7 @@ namespace ComicBin.Client
         private readonly IUriBuilder _uriBuilder;
         private readonly HttpClient _httpClient;
         private readonly Akavache.IBlobCache _cache;
+
+        private static readonly int QueueConcurrency = 4;
     }
 }
