@@ -10,5 +10,7 @@ namespace ComicBin.Client.Ui
         string Status { get; }
         ICommand RefreshCommand { get; }
         string? SelectedSeries { get; set; }
+        IEnumerable<IComicContainer> Folders { get; }
+        IComicContainer? SelectedContainer { get; set; }
     }
 }
