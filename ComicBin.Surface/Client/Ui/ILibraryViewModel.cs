@@ -15,6 +15,7 @@ namespace ComicBin.Client.Ui
         IEnumerable<ListOption<SortTypeEnum>> SortTypeOptions { get; }
         SortTypeEnum SelectedSortType { get; set; }
         bool SortDescending { get; set; }
+        bool IsMultipleSelected { get; }
     }
 
     public record class ListOption<T>(string Label, T Value);

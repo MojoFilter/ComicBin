@@ -40,7 +40,36 @@
                     </ListBox.ItemsPanel>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <local:BookTile ViewModel="{Binding}" />
+                            <local:BookTile ViewModel="{Binding}">
+                                <local:BookTile.Style>
+                                    <Style TargetType="local:BookTile">
+                                        <Setter Property="ContextMenu">
+                                            <Setter.Value>
+                                                <ContextMenu>
+                                                    <MenuItem Header="Open" FontWeight="Bold" />
+                                                </ContextMenu>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding DataContext.IsMultipleSelected, RelativeSource={RelativeSource AncestorType=local:LibraryView}}"
+                                                         Value="True">
+                                                <Setter Property="ContextMenu">
+                                                    <Setter.Value>
+                                                        <ContextMenu>
+                                                            <MenuItem Header="Mark As">
+                                                                <MenuItem Header="Read" />
+                                                                <MenuItem Header="Unread" />
+                                                            </MenuItem>
+                                                            <Separator />
+                                                            <MenuItem Header="Delete" />
+                                                        </ContextMenu>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </local:BookTile.Style>
+                            </local:BookTile>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>

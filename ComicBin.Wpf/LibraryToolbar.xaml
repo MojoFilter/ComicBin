@@ -10,13 +10,13 @@
              d:DataContext="{d:DesignInstance ui:ILibraryViewModel}">
     <ToolBarTray>
         <ToolBar>
+            <Label Content="Sort: "/>
             <ComboBox IsEditable="False"
                       ItemsSource="{Binding SortTypeOptions}"
                       SelectedValue="{Binding SelectedSortType, Mode=TwoWay}"
                       DisplayMemberPath="Label"
                       SelectedValuePath="Value"
                       Width="60"/>
-
             <ToggleButton IsChecked="{Binding SortDescending}">
                 <ToggleButton.Style>
                     <Style TargetType="ToggleButton">

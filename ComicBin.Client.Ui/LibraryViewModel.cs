@@ -39,25 +39,29 @@ namespace ComicBin.Client.Ui
             _status = this.WhenAnyValue(x => x.SelectedBooks, FormatSelection)
                           .ToProperty(this, nameof(Status));
 
+            _isMultipleSelected = this.WhenAnyValue(x=>x.SelectedBooks, bs => bs?.Skip(1).Any() is true)
+                                      .ToProperty(this, nameof(IsMultipleSelected));
+
             this.WhenAnyValue(x => x.SelectedSortType, x => x.SortDescending)
                 .Select(_ => this.BuildSort())
                 .Subscribe(_sort);
 
-            bookSource.Connect()
-                      .Filter(_filter)
-                      .Sort(_sort)
-                      .ObserveOn(uiScheduler)
-                      .Bind(out _currentView)
-                      .Subscribe();
+            var bookChanges = bookSource.Connect().Publish().RefCount();
+
+            bookChanges.Filter(_filter)
+                       .Sort(_sort)
+                       .ObserveOn(uiScheduler)
+                       .Bind(out _currentView)
+                       .Subscribe();
 
             // series source
-            bookSource.Connect()
-                      .DistinctValues(b => b.Series)
-                      .Sort(Comparer<string>.Default)
-                      .ObserveOn(uiScheduler)
-                      .Bind(out _series)
-                      .DisposeMany()
-                      .Subscribe();
+            bookChanges.DistinctValues(b => b.Series)
+                       .Sort(Comparer<string>.Default)
+                       .ObserveOn(uiScheduler)
+                       .Bind(out _series)
+                       .DisposeMany()
+                       .Subscribe();
+
 
             folderSource.Connect()
                         .ObserveOn(uiScheduler)
@@ -155,6 +159,7 @@ namespace ComicBin.Client.Ui
             set => this.RaiseAndSetIfChanged(ref _sortDescending, value);
         }
 
+        public bool IsMultipleSelected => _isMultipleSelected.Value;
 
         public ViewModelActivator Activator { get; } = new ViewModelActivator();
 
@@ -164,6 +169,7 @@ namespace ComicBin.Client.Ui
 
         private readonly IComicBinClient _client;
         private readonly ObservableAsPropertyHelper<string> _status;
+        private readonly ObservableAsPropertyHelper<bool> _isMultipleSelected;
         private readonly ISubject<Func<Book, bool>> _filter;
         private readonly ISubject<IComparer<Book>> _sort;
 
