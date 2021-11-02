@@ -1,4 +1,6 @@
-﻿using System.Windows.Controls;
+﻿using ComicBin.Client.Ui;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace ComicBin.Wpf
 {
@@ -12,5 +14,12 @@ namespace ComicBin.Wpf
             InitializeComponent();
         }
 
+        private void ClearSearch(object sender, RoutedEventArgs e)
+        {
+            if (this.DataContext is ILibraryViewModel lib)
+            {
+                lib.SearchQuery = null;
+            }
+        }
     }
 }

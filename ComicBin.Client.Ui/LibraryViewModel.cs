@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Collections.ObjectModel;
 using System.Reactive.Subjects;
 using System.Reactive.Concurrency;
+using System.Text.RegularExpressions;
 
 namespace ComicBin.Client.Ui
 {
@@ -19,8 +20,9 @@ namespace ComicBin.Client.Ui
         {
             _client = client;
             this.ViewOptions = viewOptions;
-            var filter = new BehaviorSubject<Func<Book, bool>>(_ => true);
-            var viewFilter = new BehaviorSubject<Func<Book, bool>>(_ => true);
+            var filter = new FilterSubject();
+            var viewFilter = new FilterSubject();
+            var searchFilter = new FilterSubject();
             var sort = new BehaviorSubject<IComparer<Book>>(new DefaultBookSort());            
 
             var bookSource = new SourceCache<Book, string>(b => b.Id);
@@ -57,10 +59,15 @@ namespace ComicBin.Client.Ui
                                                 && (o.Unread || (b.Read || b.CurrentPage > 0)))                       
                        .Subscribe(viewFilter);
 
+            this.WhenAnyValue(x => x.SearchQuery, this.BuildSearchFilter)
+                .Throttle(TimeSpan.FromSeconds(0.5))
+                .Subscribe(searchFilter);
+
             var bookChanges = bookSource.Connect().Publish().RefCount();
 
             bookChanges.Filter(filter)
                        .Filter(viewFilter)
+                       .Filter(searchFilter)
                        .Sort(sort)
                        .ObserveOn(uiScheduler)
                        .Bind(out _currentView)
@@ -124,6 +131,20 @@ namespace ComicBin.Client.Ui
             return Comparer<Book>.Create(sort);
         }
 
+        private Func<Book, bool> BuildSearchFilter(string? query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return _ => true;
+            }
+            var searchFields = new Func<Book, string?>[]
+            {
+                b => b.Series,
+                b=> b.Summary
+            };
+            return b => searchFields.Any(f => Regex.IsMatch(f(b) ?? string.Empty, query, RegexOptions.IgnoreCase));
+        }
+
         public ICommand RefreshCommand { get; }
 
         public IEnumerable<Book> Books => _currentView;
@@ -177,6 +198,14 @@ namespace ComicBin.Client.Ui
 
         public ViewModelActivator Activator { get; } = new ViewModelActivator();
 
+        private string? _searchQuery;
+        public string? SearchQuery
+        {
+            get => _searchQuery;
+            set => this.RaiseAndSetIfChanged(ref _searchQuery, value);
+        }
+
+
         private readonly ReadOnlyObservableCollection<Book> _currentView;
         private readonly ReadOnlyObservableCollection<string> _series;
         private readonly ReadOnlyObservableCollection<IComicContainer> _folders;
@@ -197,7 +226,19 @@ namespace ComicBin.Client.Ui
                 return x?.Series.CompareTo(y?.Series) ?? 0;
             }
         }
-    }
 
+        private class FilterSubject : ISubject<Func<Book, bool>>
+        {
+            public void OnCompleted() => _subject.OnCompleted();
+
+            public void OnError(Exception error) => _subject.OnError(error);
+
+            public void OnNext(Func<Book, bool> value) => _subject.OnNext(value);
+
+            public IDisposable Subscribe(IObserver<Func<Book, bool>> observer) => _subject.Subscribe(observer);
+
+            private BehaviorSubject<Func<Book, bool>> _subject = new BehaviorSubject<Func<Book, bool>>(_ => true);
+        }
+    }    
 
 }

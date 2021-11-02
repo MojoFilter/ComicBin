@@ -8,35 +8,58 @@
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance ui:ILibraryViewModel}">
-    <ToolBarTray>
-        <ToolBar>
-            <Label Content="Sort: "/>
-            <ComboBox IsEditable="False"
+    <Grid>
+        <ToolBarTray>
+            <ToolBar>
+                <Label Content="Sort: "/>
+                <ComboBox IsEditable="False"
                       ItemsSource="{Binding SortTypeOptions}"
                       SelectedValue="{Binding SelectedSortType, Mode=TwoWay}"
                       DisplayMemberPath="Label"
                       SelectedValuePath="Value"
                       Width="60"/>
-            <ToggleButton IsChecked="{Binding SortDescending}">
-                <ToggleButton.Style>
-                    <Style TargetType="ToggleButton">
-                        <Setter Property="Content" Value="☟" />
-                        <Style.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter Property="Content" Value="☝️" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </ToggleButton.Style>
-            </ToggleButton>
+                <ToggleButton IsChecked="{Binding SortDescending}">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton">
+                            <Setter Property="Content" Value="☟" />
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Content" Value="☝️" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
 
-            <Menu>
-                <MenuItem Header="View">
-                    <MenuItem Header="Read" IsCheckable="True" IsChecked="{Binding ViewOptions.Read}" />
-                    <MenuItem Header="Reading" IsCheckable="True" IsChecked="{Binding ViewOptions.Reading}" />
-                    <MenuItem Header="Unread" IsCheckable="True" IsChecked="{Binding ViewOptions.Unread}" />
-                </MenuItem>
-            </Menu>
-        </ToolBar>
-    </ToolBarTray>
+                <Menu>
+                    <MenuItem Header="View">
+                        <MenuItem Header="Read" IsCheckable="True" IsChecked="{Binding ViewOptions.Read}" />
+                        <MenuItem Header="Reading" IsCheckable="True" IsChecked="{Binding ViewOptions.Reading}" />
+                        <MenuItem Header="Unread" IsCheckable="True" IsChecked="{Binding ViewOptions.Unread}" />
+                    </MenuItem>
+                </Menu>
+            </ToolBar>
+        </ToolBarTray>
+        <Grid HorizontalAlignment="Right"
+              VerticalAlignment="Center">
+            <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                     Width="150" />
+            <Button HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Margin="5,0"
+                    Foreground="Maroon"
+                    Click="ClearSearch"
+                    Cursor="Hand">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <TextBlock Text="x">
+                            <TextBlock.Effect>
+                                <DropShadowEffect ShadowDepth="2" BlurRadius="4" />
+                            </TextBlock.Effect>
+                        </TextBlock>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </Grid>
+    </Grid>
 </UserControl>

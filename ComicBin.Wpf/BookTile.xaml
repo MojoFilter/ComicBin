@@ -9,7 +9,8 @@
              d:DesignHeight="220" 
              d:DesignWidth="220"
              d:DataContext="{d:DesignInstance {x:Type cb:Book}}">
-    <Grid Width="220">
+    <Grid Width="220"
+          ToolTip="{Binding Text, ElementName=title}">
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="Auto" />
@@ -18,7 +19,8 @@
                 Height="220">
             <Image x:Name="coverImage" />
         </Border>
-        <TextBlock Grid.Row="1"
+        <TextBlock x:Name="title"
+                   Grid.Row="1"
                    HorizontalAlignment="Center">
             <Span>
                 <Run Text="{Binding Series}" /> <Run Text="{Binding Number}" />

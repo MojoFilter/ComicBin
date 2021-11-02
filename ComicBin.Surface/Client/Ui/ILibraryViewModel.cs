@@ -17,6 +17,7 @@ namespace ComicBin.Client.Ui
         bool SortDescending { get; set; }
         bool IsMultipleSelected { get; }
         IViewOptions ViewOptions { get; }
+        string? SearchQuery { get; set; }
     }
 
     public record class ListOption<T>(string Label, T Value);
