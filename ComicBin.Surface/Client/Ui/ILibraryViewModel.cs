@@ -16,6 +16,7 @@ namespace ComicBin.Client.Ui
         SortTypeEnum SelectedSortType { get; set; }
         bool SortDescending { get; set; }
         bool IsMultipleSelected { get; }
+        IViewOptions ViewOptions { get; }
     }
 
     public record class ListOption<T>(string Label, T Value);

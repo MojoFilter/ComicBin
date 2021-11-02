@@ -12,11 +12,16 @@ namespace ComicBin.Client.Ui
 {
     internal class LibraryViewModel : ReactiveObject, ILibraryViewModel, IActivatableViewModel
     {
-        public LibraryViewModel(IComicBinClient client, IScheduler uiScheduler)
+        public LibraryViewModel(
+            IComicBinClient client,
+            IViewOptions viewOptions,
+            IScheduler uiScheduler)
         {
             _client = client;
-            _filter = new BehaviorSubject<Func<Book, bool>>(_ => true);
-            _sort = new BehaviorSubject<IComparer<Book>>(new DefaultBookSort());            
+            this.ViewOptions = viewOptions;
+            var filter = new BehaviorSubject<Func<Book, bool>>(_ => true);
+            var viewFilter = new BehaviorSubject<Func<Book, bool>>(_ => true);
+            var sort = new BehaviorSubject<IComparer<Book>>(new DefaultBookSort());            
 
             var bookSource = new SourceCache<Book, string>(b => b.Id);
             var folderSource = new SourceList<IComicContainer>();
@@ -44,12 +49,19 @@ namespace ComicBin.Client.Ui
 
             this.WhenAnyValue(x => x.SelectedSortType, x => x.SortDescending)
                 .Select(_ => this.BuildSort())
-                .Subscribe(_sort);
+                .Subscribe(sort);
+
+            viewOptions.Changes
+                       .Select(o => (Book b) => (o.Read || !b.Read)
+                                                && (o.Reading || (b.Read || b.CurrentPage == 0) )
+                                                && (o.Unread || (b.Read || b.CurrentPage > 0)))                       
+                       .Subscribe(viewFilter);
 
             var bookChanges = bookSource.Connect().Publish().RefCount();
 
-            bookChanges.Filter(_filter)
-                       .Sort(_sort)
+            bookChanges.Filter(filter)
+                       .Filter(viewFilter)
+                       .Sort(sort)
                        .ObserveOn(uiScheduler)
                        .Bind(out _currentView)
                        .Subscribe();
@@ -72,13 +84,13 @@ namespace ComicBin.Client.Ui
             {
                 this.WhenAnyValue(x => x.SelectedSeries)
                     .Select(s => (Book b) => String.IsNullOrWhiteSpace(s) || b.Series.Equals(s))
-                    .Subscribe(_filter)
+                    .Subscribe(filter)
                     .DisposeWith(disposables);
 
                 this.WhenAnyValue(x => x.SelectedContainer)
                     .Where(c => c is IComicContainer)
                     .Select(c => c.Filter)
-                    .Subscribe(_filter)
+                    .Subscribe(filter)
                     .DisposeWith(disposables);
 
                 refreshCommand.Execute();
@@ -161,6 +173,8 @@ namespace ComicBin.Client.Ui
 
         public bool IsMultipleSelected => _isMultipleSelected.Value;
 
+        public IViewOptions ViewOptions { get; }
+
         public ViewModelActivator Activator { get; } = new ViewModelActivator();
 
         private readonly ReadOnlyObservableCollection<Book> _currentView;
@@ -170,8 +184,7 @@ namespace ComicBin.Client.Ui
         private readonly IComicBinClient _client;
         private readonly ObservableAsPropertyHelper<string> _status;
         private readonly ObservableAsPropertyHelper<bool> _isMultipleSelected;
-        private readonly ISubject<Func<Book, bool>> _filter;
-        private readonly ISubject<IComparer<Book>> _sort;
+
 
         private class DefaultBookSort : IComparer<Book>
         {

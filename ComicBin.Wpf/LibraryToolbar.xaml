@@ -29,6 +29,14 @@
                     </Style>
                 </ToggleButton.Style>
             </ToggleButton>
+
+            <Menu>
+                <MenuItem Header="View">
+                    <MenuItem Header="Read" IsCheckable="True" IsChecked="{Binding ViewOptions.Read}" />
+                    <MenuItem Header="Reading" IsCheckable="True" IsChecked="{Binding ViewOptions.Reading}" />
+                    <MenuItem Header="Unread" IsCheckable="True" IsChecked="{Binding ViewOptions.Unread}" />
+                </MenuItem>
+            </Menu>
         </ToolBar>
     </ToolBarTray>
 </UserControl>

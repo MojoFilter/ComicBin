@@ -6,6 +6,7 @@ namespace ComicBin
     public static class ClientUiConfiguration
     {
         public static IServiceCollection AddComicBinClientUi(this IServiceCollection services) =>
-            services.AddTransient<ILibraryViewModel, LibraryViewModel>();
+            services.AddTransient<ILibraryViewModel, LibraryViewModel>()
+                    .AddTransient<IViewOptions, ViewOptions>();
     }
 }
