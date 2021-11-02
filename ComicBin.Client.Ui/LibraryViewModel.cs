@@ -1,5 +1,6 @@
 ﻿using ReactiveUI;
 using DynamicData;
+using System;
 using System.Reactive.Linq;
 using System.Reactive.Disposables;
 using System.Windows.Input;
@@ -33,9 +34,14 @@ namespace ComicBin.Client.Ui
             });
             this.RefreshCommand = refreshCommand;
 
+            this.SortTypeOptions = UiUtil.EnumOptions<SortTypeEnum>();
             
-            _status = this.WhenAnyValue(x => x.SelectedBook, b => b is Book ? $"{b.Series} #{b.Number}" : String.Empty)
+            _status = this.WhenAnyValue(x => x.SelectedBooks, FormatSelection)
                           .ToProperty(this, nameof(Status));
+
+            this.WhenAnyValue(x => x.SelectedSortType, x => x.SortDescending)
+                .Select(_ => this.BuildSort())
+                .Subscribe(_sort);
 
             bookSource.Connect()
                       .Filter(_filter)
@@ -44,6 +50,7 @@ namespace ComicBin.Client.Ui
                       .Bind(out _currentView)
                       .Subscribe();
 
+            // series source
             bookSource.Connect()
                       .DistinctValues(b => b.Series)
                       .Sort(Comparer<string>.Default)
@@ -74,6 +81,33 @@ namespace ComicBin.Client.Ui
             });
         }
 
+        private string FormatSelection(IEnumerable<Book> books)
+        {
+            books ??= Enumerable.Empty<Book>();
+            // multiple
+            if (books.Skip(1).Any())
+            {
+                return $"({books.Count()} books selected)";
+            }
+            else if (books.FirstOrDefault() is Book b)
+            {
+                return $"{b.Series} #{b.Number}";
+            }
+            return String.Empty;
+        }
+
+        private IComparer<Book> BuildSort()
+        {
+            var direction = this.SortDescending ? -1 : 1;
+            Comparison<Book> sort = this.SelectedSortType switch
+            {
+                SortTypeEnum.Series => (b1, b2) => b1.Series.CompareTo(b2.Series) * direction,
+                SortTypeEnum.Added => (b1, b2) => ((DateTime)b1.AddedUtc!).CompareTo(b2.AddedUtc) * direction,
+                _ => (_, _) => 0
+            };
+            return Comparer<Book>.Create(sort);
+        }
+
         public ICommand RefreshCommand { get; }
 
         public IEnumerable<Book> Books => _currentView;
@@ -89,11 +123,11 @@ namespace ComicBin.Client.Ui
             set => this.RaiseAndSetIfChanged(ref _selectedSeries, value);
         }
 
-        private Book? _selectedBook;
-        public Book? SelectedBook
+        private IEnumerable<Book> _selectedBooks = Enumerable.Empty<Book>();
+        public IEnumerable<Book> SelectedBooks
         {
-            get => _selectedBook;
-            set => this.RaiseAndSetIfChanged(ref _selectedBook, value);
+            get => _selectedBooks;
+            set => this.RaiseAndSetIfChanged(ref _selectedBooks, value);
         }
 
         private IComicContainer? _selectedContainer;
@@ -104,6 +138,22 @@ namespace ComicBin.Client.Ui
         }
 
         public string Status => _status.Value;
+
+        public IEnumerable<ListOption<SortTypeEnum>> SortTypeOptions { get; }
+
+        private SortTypeEnum _selectedSortType = SortTypeEnum.None;
+        public SortTypeEnum SelectedSortType
+        {
+            get => _selectedSortType;
+            set => this.RaiseAndSetIfChanged(ref this._selectedSortType, value);
+        }
+
+        private bool _sortDescending;
+        public bool SortDescending
+        {
+            get => _sortDescending;
+            set => this.RaiseAndSetIfChanged(ref _sortDescending, value);
+        }
 
 
         public ViewModelActivator Activator { get; } = new ViewModelActivator();

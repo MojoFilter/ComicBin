@@ -5,7 +5,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:local="clr-namespace:ComicBin.Wpf"
-    xmlns:ui="clr-namespace:ComicBin.Client.Ui;assembly=ComicBin.Surface"
+    xmlns:ui="clr-namespace:ComicBin.Client.Ui;assembly=ComicBin.Surface" xmlns:controls="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
     mc:Ignorable="d" 
     d:DesignHeight="450" 
     d:DesignWidth="800"
@@ -25,23 +25,26 @@
                           VerticalAlignment="Stretch"
                           Width="5" />
 
-
-            <ListBox x:Name="bookList"
-                     Grid.Column="1"
+            <DockPanel Grid.Column="1">
+                <local:LibraryToolbar DockPanel.Dock="Top" />
+                <ListBox x:Name="bookList"
                      ItemsSource="{Binding Books}"
                      SelectedItem="{Binding SelectedBook}"
+                     SelectionMode="Extended"
+                         SelectionChanged="bookList_SelectionChanged"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                <ListBox.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel />
-                    </ItemsPanelTemplate>
-                </ListBox.ItemsPanel>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <local:BookTile ViewModel="{Binding}" />
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <controls:VirtualizingWrapPanel />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <local:BookTile ViewModel="{Binding}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
         </Grid>
     </DockPanel>
 </local:LibraryViewBase>

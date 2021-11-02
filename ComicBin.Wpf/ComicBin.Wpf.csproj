@@ -11,6 +11,7 @@
     <PackageReference Include="akavache" Version="7.3.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="ReactiveUI.WPF" Version="16.2.6" />
+    <PackageReference Include="VirtualizingWrapPanel" Version="1.5.5" />
   </ItemGroup>
 
   <ItemGroup>

@@ -6,11 +6,16 @@ namespace ComicBin.Client.Ui
     {
         IEnumerable<Book> Books { get; }
         IEnumerable<string> Series { get; }
-        Book? SelectedBook { get; set; }
+        IEnumerable<Book> SelectedBooks { get; set; }
         string Status { get; }
         ICommand RefreshCommand { get; }
         string? SelectedSeries { get; set; }
         IEnumerable<IComicContainer> Folders { get; }
         IComicContainer? SelectedContainer { get; set; }
+        IEnumerable<ListOption<SortTypeEnum>> SortTypeOptions { get; }
+        SortTypeEnum SelectedSortType { get; set; }
+        bool SortDescending { get; set; }
     }
+
+    public record class ListOption<T>(string Label, T Value);
 }
