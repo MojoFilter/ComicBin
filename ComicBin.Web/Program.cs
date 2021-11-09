@@ -22,31 +22,14 @@ if (app.Environment.IsDevelopment())
 }
 
 
-app.MapGet("/refresh", async (IComicBinRepo repo, CancellationToken ct) =>
-{
-    await repo.RefreshAsync(ct).ConfigureAwait(false);
-    return "Ok, cool";
-})
-    .WithName("RefreshComicDatabase");
+var api = app.Services.GetRequiredService<IComicBinApiService>();
 
-app.MapGet("/allbooks", 
-          (IComicBinRepo repo, CancellationToken ct) => repo.GetAllBooksAsync(ct))
-   .WithName("AllBooks");
+app.MapGet("/refresh", api.RefreshComicDatabaseAsync).WithName("RefreshComicDatabase");
 
-app.MapGet("/cover/{bookId}",
-    async (HttpContext context, string bookId, IComicBinRepo repo, CancellationToken ct) =>
-    {
-        context.Response.ContentType = "image/jpg";
-        var image = await repo.GetCoverAsync(bookId).ConfigureAwait(false);
-        await image.CopyToAsync(context.Response.Body, ct).ConfigureAwait(false);        
-    })
-   .WithName("Cover");
+app.MapGet("/allbooks", api.GetAllBooksAsync).WithName("AllBooks");
 
-app.MapPost("/markread", 
-    async (MarkReadRequest req, IComicBinRepo repo, CancellationToken ct) =>
-    {
-        await repo.MarkReadAsync(req.Read, req.BookIds, ct).ConfigureAwait(false);
-    })
-   .WithName("MarkRead");
+app.MapGet("/cover/{bookId}", api.GetCoverAsync).WithName("Cover");
+
+app.MapPost("/markread", api.MarkReadAsync).WithName("MarkRead");
 
 app.Run();

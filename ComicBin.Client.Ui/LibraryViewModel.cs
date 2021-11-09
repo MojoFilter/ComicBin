@@ -84,7 +84,8 @@ namespace ComicBin.Client.Ui
 
             var bookChanges = bookSource.Connect().Publish().RefCount();
 
-            var bookset = bookChanges.Filter(filter)
+            var bookset = bookChanges.ObserveOn(RxApp.TaskpoolScheduler)
+                                     .Filter(filter)
                                      .Filter(viewFilter)
                                      .Filter(searchFilter)
                                      .Sort(sort);

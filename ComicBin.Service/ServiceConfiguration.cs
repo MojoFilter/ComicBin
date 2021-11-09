@@ -8,6 +8,7 @@ namespace ComicBin.Service
             services.AddTransient<IComicBinRepo, DirectRepo>()
                     .AddTransient<IComicBinContextFactory, ComicBinContextFactory>()
                     .AddTransient<IComicFileRepo, LocalFileRepo>()
-                    .AddTransient<IComicFileReader, LocalFileReader>();
+                    .AddTransient<IComicFileReader, LocalFileReader>()
+                    .AddTransient<IComicBinApiService, ComicBinApiService>();
     }
 }
