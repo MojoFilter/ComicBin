@@ -6,5 +6,6 @@
         Task AddBooksAsync(IAsyncEnumerable<BookEntry> newBooks, CancellationToken cancellationToken);
         Task<IEnumerable<BookEntry>> GetAllBooksAsync(CancellationToken cancellationToken);
         Task<string> GetBookPathAsync(string bookId, CancellationToken cancellationToken);
+        Task MarkReadAsync(bool read, IEnumerable<string> bookIds, CancellationToken cancellationToken);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Akavache;
+using ComicBin.Service;
 using System.Collections.Concurrent;
 using System.Net.Http.Json;
 using System.Reactive.Linq;
@@ -52,6 +53,21 @@ namespace ComicBin.Client
                     return await taskSource.Task;
                 });
             return new MemoryStream(data);
+        }
+
+        public async Task MarkReadAsync(IEnumerable<Book> books, bool read, CancellationToken cancellationToken)
+        {
+            var uri = _uriBuilder.Build("markread");
+            var req = new MarkReadRequest()
+            {
+                Read = read,
+                BookIds = books.Select(book => book.Id).ToArray()
+            };
+            await _httpClient.PostAsJsonAsync(uri, req, cancellationToken).ConfigureAwait(false);
+            foreach (var book in books)
+            {
+                book.Read = true;
+            }
         }
 
         private async void ProcessQueue()

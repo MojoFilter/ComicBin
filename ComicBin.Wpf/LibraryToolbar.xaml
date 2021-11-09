@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="ComicBin.Wpf.LibraryToolbar"
+﻿<local:LibraryToolbarBase x:Class="ComicBin.Wpf.LibraryToolbar"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -9,28 +9,39 @@
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance ui:ILibraryViewModel}">
     <Grid>
+        <Grid.Resources>
+            <Style x:Key="arrangeTypeStyle" TargetType="ComboBox">
+                <Setter Property="IsEditable" Value="False" />
+                <Setter Property="DisplayMemberPath" Value="Label"/>
+                <Setter Property="SelectedValuePath" Value="Value" />
+                <Setter Property="Width" Value="60" />
+            </Style>
+
+            <Style x:Key="arrangeDirectionStyle" TargetType="ToggleButton">
+                <Setter Property="Content" Value="☟" />
+                <Style.Triggers>
+                    <Trigger Property="IsChecked" Value="True">
+                        <Setter Property="Content" Value="☝️" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Resources>
         <ToolBarTray>
             <ToolBar>
+                <Label Content="Group: " />
+                <ComboBox Style="{StaticResource arrangeTypeStyle}"
+                          ItemsSource="{Binding GroupTypeOptions}"
+                          SelectedValue="{Binding SelectedGroupType}" />
+                <ToggleButton Style="{StaticResource arrangeDirectionStyle}"
+                              IsChecked="{Binding GroupDescending}" />
+                <Separator />
                 <Label Content="Sort: "/>
-                <ComboBox IsEditable="False"
-                      ItemsSource="{Binding SortTypeOptions}"
-                      SelectedValue="{Binding SelectedSortType, Mode=TwoWay}"
-                      DisplayMemberPath="Label"
-                      SelectedValuePath="Value"
-                      Width="60"/>
-                <ToggleButton IsChecked="{Binding SortDescending}">
-                    <ToggleButton.Style>
-                        <Style TargetType="ToggleButton">
-                            <Setter Property="Content" Value="☟" />
-                            <Style.Triggers>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter Property="Content" Value="☝️" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ToggleButton.Style>
-                </ToggleButton>
-
+                <ComboBox Style="{StaticResource arrangeTypeStyle}"
+                          ItemsSource="{Binding SortTypeOptions}"
+                          SelectedValue="{Binding SelectedSortType, Mode=TwoWay}" />
+                <ToggleButton Style="{StaticResource arrangeDirectionStyle}"
+                              IsChecked="{Binding SortDescending}" />
+                <Separator />
                 <Menu>
                     <MenuItem Header="View">
                         <MenuItem Header="Read" IsCheckable="True" IsChecked="{Binding ViewOptions.Read}" />
@@ -62,4 +73,4 @@
             </Button>
         </Grid>
     </Grid>
-</UserControl>
+</local:LibraryToolbarBase>

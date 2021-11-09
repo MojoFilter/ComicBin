@@ -53,6 +53,12 @@ namespace ComicBin.Service
                              .FirstAsync(cancellationToken);
         }
 
+        public async Task MarkReadAsync(bool read, IEnumerable<string> bookIds, CancellationToken cancellationToken)
+        {
+            await this.Books.Where(b => bookIds.Contains(b.Id)).ForEachAsync(b => b.Read = read).ConfigureAwait(false);
+            await this.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
         private readonly string _dbPath;
     }
 }

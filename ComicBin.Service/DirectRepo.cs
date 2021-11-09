@@ -31,6 +31,12 @@
             return await _reader.GetCoverAsync(path, cancellationToken).ConfigureAwait(false);
         }
 
+        public async Task MarkReadAsync(bool read, IEnumerable<string> bookIds, CancellationToken ct = default)
+        {
+            using var ctx = _contextFactory.NewComicBinContext();
+            await ctx.MarkReadAsync(read, bookIds, ct).ConfigureAwait(false);
+        }
+
         private readonly IComicFileRepo _fileRepo;
         private readonly IComicBinContextFactory _contextFactory;
         private readonly IComicFileReader _reader;

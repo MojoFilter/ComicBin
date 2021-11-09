@@ -1,13 +1,17 @@
 ﻿using ComicBin.Client.Ui;
+using ReactiveUI;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace ComicBin.Wpf
 {
+
+    public class LibraryToolbarBase : ReactiveUserControl<ILibraryViewModel> { }
+
     /// <summary>
     /// Interaction logic for LibraryToolbar.xaml
     /// </summary>
-    public partial class LibraryToolbar : UserControl
+    public partial class LibraryToolbar : LibraryToolbarBase
     {
         public LibraryToolbar()
         {

@@ -42,4 +42,11 @@ app.MapGet("/cover/{bookId}",
     })
    .WithName("Cover");
 
+app.MapPost("/markread", 
+    async (MarkReadRequest req, IComicBinRepo repo, CancellationToken ct) =>
+    {
+        await repo.MarkReadAsync(req.Read, req.BookIds, ct).ConfigureAwait(false);
+    })
+   .WithName("MarkRead");
+
 app.Run();

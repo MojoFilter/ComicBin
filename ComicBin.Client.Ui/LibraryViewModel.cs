@@ -1,13 +1,13 @@
-﻿using ReactiveUI;
-using DynamicData;
-using System;
-using System.Reactive.Linq;
-using System.Reactive.Disposables;
-using System.Windows.Input;
+﻿using DynamicData;
+using DynamicData.Binding;
+using ReactiveUI;
 using System.Collections.ObjectModel;
-using System.Reactive.Subjects;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Text.RegularExpressions;
+using System.Windows.Input;
 
 namespace ComicBin.Client.Ui
 {
@@ -18,21 +18,27 @@ namespace ComicBin.Client.Ui
             IViewOptions viewOptions,
             IScheduler uiScheduler)
         {
-            _client = client;
             this.ViewOptions = viewOptions;
             var filter = new FilterSubject();
             var viewFilter = new FilterSubject();
             var searchFilter = new FilterSubject();
-            var sort = new BehaviorSubject<IComparer<Book>>(new DefaultBookSort());            
+            var sort = new BehaviorSubject<IComparer<Book>>(new DefaultBookSort());
 
             var bookSource = new SourceCache<Book, string>(b => b.Id);
             var folderSource = new SourceList<IComicContainer>();
             folderSource.Add(new LibraryList());
             folderSource.Add(new ComicList("Just X", b => b.Series?.Contains('x', StringComparison.InvariantCultureIgnoreCase) == true));
 
+            void refreshFilters()
+            {
+                filter!.Refresh();
+                viewFilter!.Refresh();
+                searchFilter!.Refresh();
+            }
+
             var refreshCommand = ReactiveCommand.CreateFromTask(async ct =>
             {
-                var books = await _client.GetAllBooksAsync(ct).ConfigureAwait(false);
+                var books = await client.GetAllBooksAsync(ct).ConfigureAwait(false);
                 bookSource.Edit(u =>
                 {
                     u.Clear();
@@ -41,7 +47,20 @@ namespace ComicBin.Client.Ui
             });
             this.RefreshCommand = refreshCommand;
 
+            async Task markRead(bool read, CancellationToken ct)
+            {
+                if (this.SelectedBooks.Any())
+                {
+                    await client.MarkReadAsync(this.SelectedBooks, read, ct).ConfigureAwait(false);
+                    refreshFilters();
+                }
+            }
+
+            this.MarkAsReadCommand = ReactiveCommand.CreateFromTask(ct => markRead(true, ct));
+            this.MarkAsUnreadCommand = ReactiveCommand.CreateFromTask(ct => markRead(false, ct));
+
             this.SortTypeOptions = UiUtil.EnumOptions<SortTypeEnum>();
+            this.GroupTypeOptions = UiUtil.EnumOptions<GroupTypeEnum>();
             
             _status = this.WhenAnyValue(x => x.SelectedBooks, FormatSelection)
                           .ToProperty(this, nameof(Status));
@@ -65,13 +84,15 @@ namespace ComicBin.Client.Ui
 
             var bookChanges = bookSource.Connect().Publish().RefCount();
 
-            bookChanges.Filter(filter)
-                       .Filter(viewFilter)
-                       .Filter(searchFilter)
-                       .Sort(sort)
-                       .ObserveOn(uiScheduler)
-                       .Bind(out _currentView)
-                       .Subscribe();
+            var bookset = bookChanges.Filter(filter)
+                                     .Filter(viewFilter)
+                                     .Filter(searchFilter)
+                                     .Sort(sort);
+
+            bookset.ObserveOn(uiScheduler)
+                   .Bind(out _currentView)
+                   .Subscribe();
+                               
 
             // series source
             bookChanges.DistinctValues(b => b.Series)
@@ -80,7 +101,6 @@ namespace ComicBin.Client.Ui
                        .Bind(out _series)
                        .DisposeMany()
                        .Subscribe();
-
 
             folderSource.Connect()
                         .ObserveOn(uiScheduler)
@@ -102,6 +122,11 @@ namespace ComicBin.Client.Ui
 
                 refreshCommand.Execute();
             });
+        }
+
+        private string GroupBook(Book book)
+        {
+            return book.Series;
         }
 
         private string FormatSelection(IEnumerable<Book> books)
@@ -146,6 +171,9 @@ namespace ComicBin.Client.Ui
         }
 
         public ICommand RefreshCommand { get; }
+
+        public ICommand MarkAsReadCommand { get; }
+        public ICommand MarkAsUnreadCommand { get; }
 
         public IEnumerable<Book> Books => _currentView;
 
@@ -192,6 +220,24 @@ namespace ComicBin.Client.Ui
             set => this.RaiseAndSetIfChanged(ref _sortDescending, value);
         }
 
+
+        public IEnumerable<ListOption<GroupTypeEnum>> GroupTypeOptions { get; }
+
+        private GroupTypeEnum _selectedGroupType = GroupTypeEnum.None;
+        public GroupTypeEnum SelectedGroupType
+        {
+            get => _selectedGroupType;
+            set => this.RaiseAndSetIfChanged(ref _selectedGroupType, value);
+        }
+
+        private bool _groupDescending;
+        public bool GroupDescending
+        {
+            get => _groupDescending;
+            set => this.RaiseAndSetIfChanged(ref _groupDescending, value);
+        }
+
+
         public bool IsMultipleSelected => _isMultipleSelected.Value;
 
         public IViewOptions ViewOptions { get; }
@@ -206,11 +252,16 @@ namespace ComicBin.Client.Ui
         }
 
 
+        public string GroupFromBook(Book book)
+        {
+            return book.Series;
+        }
+
         private readonly ReadOnlyObservableCollection<Book> _currentView;
         private readonly ReadOnlyObservableCollection<string> _series;
         private readonly ReadOnlyObservableCollection<IComicContainer> _folders;
 
-        private readonly IComicBinClient _client;
+        //private readonly IComicBinClient _client;
         private readonly ObservableAsPropertyHelper<string> _status;
         private readonly ObservableAsPropertyHelper<bool> _isMultipleSelected;
 
@@ -237,8 +288,32 @@ namespace ComicBin.Client.Ui
 
             public IDisposable Subscribe(IObserver<Func<Book, bool>> observer) => _subject.Subscribe(observer);
 
+            public void Refresh() => this.OnNext(_subject.Value);
+
             private BehaviorSubject<Func<Book, bool>> _subject = new BehaviorSubject<Func<Book, bool>>(_ => true);
         }
+
+        public sealed class ComicGroup : ObservableCollectionExtended<Book>, IComicGroup
+        {
+            public static ComicGroup Create(IGroup<Book, string, string> group) => new ComicGroup(group);
+
+            public ComicGroup(IGroup<Book, string, string> group)
+            {
+                this.Key = group.Key;
+                _cleanUp = group.Cache.Connect().Bind(this).Subscribe();
+            }
+
+            public string Key { get; }
+
+            public void Dispose()
+            {
+                _cleanUp.Dispose();
+            }
+
+            private readonly IDisposable _cleanUp;
+        }
     }    
+
+    public record class ComicItem(string Group, Book Book);
 
 }

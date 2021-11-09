@@ -10,7 +10,11 @@
     d:DesignHeight="450" 
     d:DesignWidth="800"
     d:DataContext="{d:DesignInstance {x:Type ui:ILibraryViewModel}}">
-    <DockPanel>
+    <DockPanel x:Name="layoutRoot">
+        <DockPanel.Resources>
+            <CollectionViewSource x:Key="booksView"
+                                  Source="{Binding Books}" />
+        </DockPanel.Resources>
         <Button DockPanel.Dock="Top"
                 Content="Refresh"
                 Command="{Binding RefreshCommand}" />
@@ -28,11 +32,10 @@
             <DockPanel Grid.Column="1">
                 <local:LibraryToolbar DockPanel.Dock="Top" />
                 <ListBox x:Name="bookList"
-                     ItemsSource="{Binding Books}"
-                     SelectedItem="{Binding SelectedBook}"
-                     SelectionMode="Extended"
+                         ItemsSource="{Binding Source={StaticResource booksView}}"
+                         SelectionMode="Extended"
                          SelectionChanged="bookList_SelectionChanged"
-                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
                             <controls:VirtualizingWrapPanel />
@@ -40,7 +43,8 @@
                     </ListBox.ItemsPanel>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <local:BookTile ViewModel="{Binding}">
+                            <local:BookTile ViewModel="{Binding}"
+                                            Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}">
                                 <local:BookTile.Style>
                                     <Style TargetType="local:BookTile">
                                         <Setter Property="ContextMenu">
@@ -55,10 +59,10 @@
                                                          Value="True">
                                                 <Setter Property="ContextMenu">
                                                     <Setter.Value>
-                                                        <ContextMenu>
+                                                        <ContextMenu  DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
                                                             <MenuItem Header="Mark As">
-                                                                <MenuItem Header="Read" />
-                                                                <MenuItem Header="Unread" />
+                                                                <MenuItem Header="Read" Command="{Binding MarkAsReadCommand}" />
+                                                                <MenuItem Header="Unread" Command="{Binding MarkAsUnreadCommand}" />
                                                             </MenuItem>
                                                             <Separator />
                                                             <MenuItem Header="Delete" />
@@ -72,6 +76,24 @@
                             </local:BookTile>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
+                    <ListBox.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock
+                                            HorizontalAlignment="Left" 
+                                            FontWeight="Bold" 
+                                            FontSize="14"
+                                            Text="{Binding Name}" />
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                            <GroupStyle.Panel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </GroupStyle.Panel>
+                        </GroupStyle>
+                    </ListBox.GroupStyle>
                 </ListBox>
             </DockPanel>
         </Grid>

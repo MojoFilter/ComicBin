@@ -18,6 +18,13 @@ namespace ComicBin.Client.Ui
         bool IsMultipleSelected { get; }
         IViewOptions ViewOptions { get; }
         string? SearchQuery { get; set; }
+        IEnumerable<ListOption<GroupTypeEnum>> GroupTypeOptions { get; }
+        GroupTypeEnum SelectedGroupType { get; set; }
+        bool GroupDescending { get; set; }
+        ICommand MarkAsUnreadCommand { get; }
+        ICommand MarkAsReadCommand { get; }
+
+        string GroupFromBook(Book book);
     }
 
     public record class ListOption<T>(string Label, T Value);

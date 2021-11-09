@@ -6,5 +6,6 @@
 
         Task<IEnumerable<Book>> GetAllBooksAsync(CancellationToken cancellationToken = default);
         Task<Stream> GetCoverAsync(string bookId, CancellationToken cancellationToken = default);
+        Task MarkReadAsync(bool read, IEnumerable<string> bookIds, CancellationToken ct);
     }
 }
