@@ -2,11 +2,27 @@
 using ReactiveUI;
 using System;
 using System.Reactive.Disposables;
+using System.Windows;
 using System.Windows.Media.Imaging;
 
 namespace ComicBin.Wpf
 {
-    public class BookTileBase : ReactiveUserControl<Book> { }
+    public class BookTileBase : ReactiveUserControl<Book> 
+    {
+
+
+        public double CoverScale
+        {
+            get { return (double)GetValue(CoverScaleProperty); }
+            set { SetValue(CoverScaleProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for CoverScale.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CoverScaleProperty =
+            DependencyProperty.Register("CoverScale", typeof(double), typeof(BookTileBase), new PropertyMetadata(1.0));
+
+
+    }
 
     /// <summary>
     /// Interaction logic for BookTile.xaml

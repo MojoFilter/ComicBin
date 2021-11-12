@@ -5,22 +5,29 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ComicBin.Wpf"
              xmlns:cb="clr-namespace:ComicBin;assembly=ComicBin.Surface"
+             x:Name="tile"
              mc:Ignorable="d" 
              d:DesignHeight="220" 
              d:DesignWidth="220"
              d:DataContext="{d:DesignInstance {x:Type cb:Book}}">
-    <Grid Width="220"
-          ToolTip="{Binding Text, ElementName=title}">
+    <Grid ToolTip="{Binding Text, ElementName=title}">
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Border Width="170"
+        <Border Width="220">
+            <Border.LayoutTransform>
+                <ScaleTransform ScaleX="{Binding CoverScale, ElementName=tile}"
+                                ScaleY="{Binding CoverScale, ElementName=tile}" />
+            </Border.LayoutTransform>
+            <Border Width="170"
                 Height="220">
-            <Image x:Name="coverImage" />
+                <Image x:Name="coverImage" />
+            </Border>
         </Border>
         <TextBlock x:Name="title"
                    Grid.Row="1"
+                   TextWrapping="Wrap"
                    HorizontalAlignment="Center">
             <Span>
                 <Run Text="{Binding Series}" /> <Run Text="{Binding Number}" />

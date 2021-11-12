@@ -44,6 +44,7 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <local:BookTile ViewModel="{Binding}"
+                                            CoverScale="{Binding DataContext.CoverScale, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                             Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}">
                                 <local:BookTile.Style>
                                     <Style TargetType="local:BookTile">

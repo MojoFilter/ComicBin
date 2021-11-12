@@ -252,10 +252,43 @@ namespace ComicBin.Client.Ui
             set => this.RaiseAndSetIfChanged(ref _searchQuery, value);
         }
 
+        private double _coverScale = 1.0;
+        public double CoverScale
+        {
+            get => _coverScale;
+            set => this.RaiseAndSetIfChanged(ref _coverScale, value);
+        }
 
         public string GroupFromBook(Book book)
         {
-            return book.Series;
+            return this.SelectedGroupType switch
+            {
+                GroupTypeEnum.Added => GroupByAdded(book),
+                GroupTypeEnum.Series => book.Series,
+                _ => string.Empty
+            };
+        }
+
+        private static string GroupByAdded(Book book)
+        {
+            var now = DateTime.UtcNow;
+            var diff = (7 + (now.DayOfWeek - DayOfWeek.Sunday)) % 7;            
+            var startOfThisWeek = now.AddDays(-1 * diff).Date;
+            var startOfLastWeek = startOfThisWeek.AddDays(-7);
+            var startOfThisMonth = now.AddDays(-1 * now.Day).Date;
+            var startOfLastMonth = startOfThisMonth.AddMonths(-1);
+            var groupings = new (DateTime startDate, string name)[]
+            {
+                (now.Date, "Today"),
+                (startOfThisWeek, "This Week"),
+                (startOfLastWeek, "Last Week"),
+                (startOfThisMonth, "This Month"),
+                (startOfLastMonth, "Last Month")
+            };
+            return groupings.Where(g => book.AddedUtc > g.startDate)
+                            .Select(g => g.name)
+                            .DefaultIfEmpty("Older")
+                            .FirstOrDefault()!;
         }
 
         private readonly ReadOnlyObservableCollection<Book> _currentView;
