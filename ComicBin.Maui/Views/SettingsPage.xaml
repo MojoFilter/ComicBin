@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:ComicBin.Maui.ViewModels"
+             x:Class="ComicBin.Maui.SettingsPage"
+             Title="SettingsPage"
+             BackgroundColor="White"
+             x:DataType="vm:SettingsViewModel">
+    <StackLayout>
+        <Grid Padding="12" ColumnDefinitions="{OnIdiom Phone='Auto,*,Auto', Default='.05*,.9*,.05*'}">
+            <StackLayout Grid.Column="1">
+                <Label Text="ComicBin Settings" />
+                <Label Text="Server:" />
+                <Entry Text="{Binding ServiceAddress}" />
+            </StackLayout>
+        </Grid>
+    </StackLayout>
+</ContentPage>

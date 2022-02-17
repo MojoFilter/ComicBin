@@ -42,7 +42,6 @@ namespace ComicBin.Wpf
                               }).DisposeWith(disposables);
             });
 
-            CollectionViewSource cvs;            
         }
 
         private void bookList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)

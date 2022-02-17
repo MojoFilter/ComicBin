@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:vm="clr-namespace:ComicBin.Maui.ViewModels"
+       xmlns:v="clr-namespace:ComicBin.Maui"
+             x:Class="ComicBin.Maui.AppShell"
+             Title="AppShell"
+             BackgroundColor="White"
+       x:DataType="vm:AppViewModel">
+    <v:LibraryPage />
+    <ShellContent Route="settings"
+                  Title="Settings"
+                  Content="{Binding Settings}"
+                  ContentTemplate="{DataTemplate v:SettingsPage}"/>
+</Shell>

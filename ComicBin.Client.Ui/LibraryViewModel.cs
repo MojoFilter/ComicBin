@@ -73,9 +73,9 @@ namespace ComicBin.Client.Ui
                 .Subscribe(sort);
 
             viewOptions.Changes
-                       .Select(o => (Book b) => (o.Read || !b.Read)
-                                                && (o.Reading || (b.Read || b.CurrentPage == 0) )
-                                                && (o.Unread || (b.Read || b.CurrentPage > 0)))                       
+                       .SelectBookFilter((o, b) => (o.Read || !b.Read)
+                                            && (o.Reading || (b.Read || b.CurrentPage == 0))
+                                            && (o.Unread || (b.Read || b.CurrentPage > 0)))
                        .Subscribe(viewFilter);
 
             this.WhenAnyValue(x => x.SearchQuery, this.BuildSearchFilter)
@@ -111,13 +111,13 @@ namespace ComicBin.Client.Ui
             this.WhenActivated((CompositeDisposable disposables) =>
             {
                 this.WhenAnyValue(x => x.SelectedSeries)
-                    .Select(s => (Book b) => String.IsNullOrWhiteSpace(s) || b.Series.Equals(s))
+                    .SelectBookFilter((s, b) => String.IsNullOrWhiteSpace(s) || b.Series.Equals(s))
                     .Subscribe(filter)
                     .DisposeWith(disposables);
 
                 this.WhenAnyValue(x => x.SelectedContainer)
                     .Where(c => c is IComicContainer)
-                    .Select(c => c.Filter)
+                    .SelectBookFilter((c, b) => c!.Filter(b))
                     .Subscribe(filter)
                     .DisposeWith(disposables);
 

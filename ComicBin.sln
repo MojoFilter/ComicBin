@@ -9,11 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComicBin.Surface", "ComicBi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComicBin.Service", "ComicBin.Service\ComicBin.Service.csproj", "{567BD783-F808-438F-BCFA-FACDEA213A8F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComicBin.Wpf", "ComicBin.Wpf\ComicBin.Wpf.csproj", "{5BB0B96D-8CAB-44F6-AF1F-363052917B9E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComicBin.Wpf", "ComicBin.Wpf\ComicBin.Wpf.csproj", "{5BB0B96D-8CAB-44F6-AF1F-363052917B9E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComicBin.Client", "ComicBin.Client\ComicBin.Client.csproj", "{797032D0-69AE-45B4-A9FF-0E8AFC5B9FF5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComicBin.Client", "ComicBin.Client\ComicBin.Client.csproj", "{797032D0-69AE-45B4-A9FF-0E8AFC5B9FF5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComicBin.Client.Ui", "ComicBin.Client.Ui\ComicBin.Client.Ui.csproj", "{63E38F0B-C396-46D2-8994-98573E266678}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComicBin.Client.Ui", "ComicBin.Client.Ui\ComicBin.Client.Ui.csproj", "{63E38F0B-C396-46D2-8994-98573E266678}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComicBin.Maui", "ComicBin.Maui\ComicBin.Maui.csproj", "{79591911-A3B7-4486-836F-CA65C36A3B2D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,12 @@ Global
 		{63E38F0B-C396-46D2-8994-98573E266678}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63E38F0B-C396-46D2-8994-98573E266678}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{63E38F0B-C396-46D2-8994-98573E266678}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79591911-A3B7-4486-836F-CA65C36A3B2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79591911-A3B7-4486-836F-CA65C36A3B2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79591911-A3B7-4486-836F-CA65C36A3B2D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{79591911-A3B7-4486-836F-CA65C36A3B2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79591911-A3B7-4486-836F-CA65C36A3B2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79591911-A3B7-4486-836F-CA65C36A3B2D}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
